@@ -7,7 +7,6 @@ require( GetScriptDirectory().."/constants" )
 require( GetScriptDirectory().."/item_purchase_bloodseeker" )
 require ( GetScriptDirectory().."/ability_usage_bloodseeker" )
 require( GetScriptDirectory().."/jungling_generic" )
-require( GetScriptDirectory().."/constants" )
 
 local utils = require( GetScriptDirectory().."/utility" )
 local dt = require( GetScriptDirectory().."/decision_tree" )
