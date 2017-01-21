@@ -72,6 +72,35 @@ function MinionThink(minion)
     print("DADDY!!", utils.GetHeroName(GetBot()))
 end
 
+-- We over-write DoRetreat behavior for JUNLGER Enigma
+function enigmaBot:DoRetreat(bot, reason)
+	-- if we got creep damage and are a JUNGLER do special stuff
+    -- TODO: shouldn't this check the action, insted of the role?
+	if reason == 3 and getHeroVar("Role") == constants.ROLE_JUNGLER then
+		-- if our health is lower than maximum( 15% health, 100 health )
+		if bot:GetHealth() < math.max(bot:GetMaxHealth()*0.15, 100) then
+			setHeroVar("IsRetreating", true)
+			if ( self:HasAction(constants.ACTION_RETREAT) == false ) then
+				self:AddAction(constants.ACTION_RETREAT)
+				setHeroVar("IsInLane", false)
+			end
+		end
+		-- if we are retreating - piggyback on retreat logic movement code
+		if self:GetAction() == constants.ACTION_RETREAT then
+			-- we use '.' instead of ':' and pass 'self' so it is the correct self
+			return dt.DoRetreat(self, bot, 1)
+		end
+
+		-- we are not retreating, allow decision tree logic to fall through
+		-- to the next level
+		return false
+	-- if we are not a jungler, invoke default DoRetreat behavior
+	else
+		-- we use '.' instead of ':' and pass 'self' so it is the correct self
+		return dt.DoRetreat(self, bot, reason)
+	end
+end
+
 function enigmaBot:GetMaxClearableCampLevel(bot)
 	if DotaTime() < 30 then
 		return constants.CAMP_EASY

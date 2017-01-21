@@ -13,14 +13,14 @@ function Think()
 		print( "game mode: ", a);
 
 		if ( a == GAMEMODE_AP )
-		then 
+		then
 			print ( "All Pick" )
 			if ( GetTeam() == TEAM_RADIANT )
 			then
 				print( "selecting radiant" );
 				SelectHero( 2, "npc_dota_hero_antimage" );
 				SelectHero( 3, "npc_dota_hero_viper" );
-				SelectHero( 4, "npc_dota_hero_bloodseeker" );
+				SelectHero( 4, "npc_dota_hero_enigma" );
 				SelectHero( 5, "npc_dota_hero_lina" );
 				SelectHero( 6, "npc_dota_hero_crystal_maiden" );
 			elseif ( GetTeam() == TEAM_DIRE )
