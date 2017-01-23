@@ -35,6 +35,8 @@ local ENIGMA_ABILITY6 = "special_bonus_respawn_reduction_30"
 local ENIGMA_ABILITY7 = "special_bonus_armor_12"
 local ENIGMA_ABILITY8 = "special_bonus_unique_enigma"
 
+local cant_convert = {"npc_dota_neutral_enraged_wildkin", "npc_dota_neutral_dark_troll_warlord", "npc_dota_neutral_centaur_khan", "npc_dota_neutral_satyr_hellcaller", "npc_dota_neutral_polar_furbolg_ursa_warrior"}
+
 local EnigmaAbilityPriority = {
 	ENIGMA_SKILL_W,    ENIGMA_SKILL_Q,    ENIGMA_SKILL_W,    ENIGMA_SKILL_E,    ENIGMA_SKILL_W,
     ENIGMA_SKILL_R,    ENIGMA_SKILL_W,    ENIGMA_SKILL_Q,    ENIGMA_SKILL_E,    ENIGMA_ABILITY1,
@@ -69,37 +71,20 @@ function Think()
 end
 
 function MinionThink(minion)
-    print("DADDY!!", utils.GetHeroName(GetBot()))
-end
-
--- We over-write DoRetreat behavior for JUNLGER Enigma
-function enigmaBot:DoRetreat(bot, reason)
-	-- if we got creep damage and are a JUNGLER do special stuff
-    -- TODO: shouldn't this check the action, insted of the role?
-	if reason == 3 and getHeroVar("Role") == constants.ROLE_JUNGLER then
-		-- if our health is lower than maximum( 15% health, 100 health )
-		if bot:GetHealth() < math.max(bot:GetMaxHealth()*0.15, 100) then
-			setHeroVar("IsRetreating", true)
-			if ( self:HasAction(constants.ACTION_RETREAT) == false ) then
-				self:AddAction(constants.ACTION_RETREAT)
-				setHeroVar("IsInLane", false)
-			end
-		end
-		-- if we are retreating - piggyback on retreat logic movement code
-		if self:GetAction() == constants.ACTION_RETREAT then
-			-- we use '.' instead of ':' and pass 'self' so it is the correct self
-			return dt.DoRetreat(self, bot, 1)
-		end
-
-		-- we are not retreating, allow decision tree logic to fall through
-		-- to the next level
-		return false
-	-- if we are not a jungler, invoke default DoRetreat behavior
+	local neutrals = minion:GetNearbyCreeps(1500,true);
+	if #neutrals > 0 then
+		minion:Action_AttackUnit(neutrals[1], true)
 	else
-		-- we use '.' instead of ':' and pass 'self' so it is the correct self
-		return dt.DoRetreat(self, bot, reason)
+		print("no target!")
 	end
+	--[[local target = getHeroVar("JungleTarget")
+  if target ~= nil and target:CanBeSeen() then
+		print(minion)
+		print(minion:GetUnitName())
+		minion:Action_AttackUnit(target, true)
+	end]]--
 end
+
 
 function enigmaBot:GetMaxClearableCampLevel(bot)
 	if DotaTime() < 30 then
@@ -120,11 +105,18 @@ function enigmaBot:IsReadyToRoam(bot)
 end
 
 function enigmaBot:DoCleanCamp(bot, neutrals)
-    local conversion = bot:GetAbilityByName("enigma_demonic_conversion")
-	table.sort(neutrals, function(n1, n2) return n1:GetHealth() < n2:GetHealth() end) -- sort by health
-    if conversion:IsFullyCastable() then
-        -- TODO: Find the biggest guy we can convert
-        bot:Action_UseAbilityOnEntity(conversion, neutrals[#neutrals])
+
+	local conversion = bot:GetAbilityByName("enigma_demonic_conversion")
+	table.sort(neutrals, function(n1, n2) return n1:GetHealth() > n2:GetHealth() end) -- sort by health, descending
+  if conversion:IsFullyCastable() then
+		for i, neutral in ipairs(neutrals) do
+			if not utils.InTable(cant_convert, neutral:GetUnitName()) then
+				table.remove(neutrals, i)
+				bot:Action_UseAbilityOnEntity(conversion, neutral)
+				break
+			end
     end
-    bot:Action_AttackUnit(neutrals[#neutrals], true)
+  end
+	setHeroVar("JungleTarget", neutrals[#neutrals])
+  bot:Action_AttackUnit(neutrals[#neutrals], true)
 end
