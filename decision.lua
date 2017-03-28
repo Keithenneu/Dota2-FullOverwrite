@@ -7,6 +7,8 @@ require( GetScriptDirectory().."/constants" )
 require( GetScriptDirectory().."/role" )
 require( GetScriptDirectory().."/buildings_status" )
 require( GetScriptDirectory().."/global_game_state" )
+require( GetScriptDirectory().."/jungle_status" )
+require( GetScriptDirectory().."/map_control" )
 require( GetScriptDirectory().."/item_usage" )
 require( GetScriptDirectory().."/debugging" )
 
@@ -195,6 +197,8 @@ function X:Think(bot)
     -- update our global enemy info cache
     enemyData.UpdateEnemyInfo()
     --enemyData.PrintEnemyInfo()
+
+    map_control.print_points()
 
     -- draw debug stuff (actual drawing is done on the first call in a frame)
     debugging.draw()
