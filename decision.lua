@@ -197,8 +197,12 @@ function X:Think(bot)
     -- update our global enemy info cache
     enemyData.UpdateEnemyInfo()
     --enemyData.PrintEnemyInfo()
+    
+    -- update our building information
+    buildings_status.Update()
 
-    map_control.print_points()
+    -- update map control every 2 seconds
+    utils.rate_limited_call(map_control.update, 2)
 
     -- draw debug stuff (actual drawing is done on the first call in a frame)
     debugging.draw()
@@ -208,10 +212,7 @@ function X:Think(bot)
         self:DoWhileDead(bot)
         return
     end
-    
-    -- update our building information
-    buildings_status.Update()
-    
+
     -- check if we should change lanes
     self:DoChangeLane(bot)
     

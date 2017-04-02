@@ -20,6 +20,8 @@ U = {}
 U.creeps = nil
 U.Lanes={[1]=LANE_BOT,[2]=LANE_MID,[3]=LANE_TOP};
 
+U.rate_limit_timings = {}
+
 U.Locations = {
 ["RadiantShop"]= Vector(-4739,1263),
 ["DireShop"]= Vector(4559,-1554),
@@ -308,6 +310,18 @@ end
 -------------------------------------------------------------------------------
 -- Functions
 -------------------------------------------------------------------------------
+
+function U.rate_limited_call(func, time)
+    if U.rate_limit_timings[func] == nil then
+        U.rate_limit_timings[func] = GameTime()
+        func()
+    else
+        if GameTime() >= U.rate_limit_timings[func] + time then
+            U.rate_limit_timings[func] = GameTime()
+            func()
+        end
+    end
+end
 
 function U.GetOppositeTeamTo(team)
   if team == constants.TEAM_RADIANT then
